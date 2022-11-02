@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static AutoClicker_Task.Enums;
+using OpenQA.Selenium.Edge;
+using OpenQA.Selenium.Firefox;
 
 namespace AutoClicker_Task
 {
@@ -46,6 +45,17 @@ namespace AutoClicker_Task
                 Process.Start(new ProcessStartInfo("cmd", $"/c start https://www.mozilla.org/ru/firefox/download/thanks/"));
                 status = false;
             }
+            try
+            { //пробный запуск драйвера
+                FirefoxOptions firefoxOptions = new FirefoxOptions();
+                firefoxOptions.BrowserExecutableLocation = ("C:\\Program Files\\Mozilla Firefox\\firefox.exe");
+                IWebDriver driver = new FirefoxDriver(firefoxOptions);
+                driver.Dispose();
+            }
+            catch (Exception)
+            {
+                status = false;
+            }
             return status;
         }
 
@@ -62,6 +72,15 @@ namespace AutoClicker_Task
             {
                 PrintLog.Print("Chrome не найден. Скачайте и установите последнюю версию.", "", "", LevelEvent.Error);
                 Process.Start(new ProcessStartInfo("cmd", $"/c start https://www.google.com/intl/ru_ru/chrome/"));
+                status = false;
+            }
+            try
+            { //пробный запуск драйвера
+                IWebDriver driver = new ChromeDriver();
+                driver.Dispose();
+            }
+            catch (Exception)
+            {
                 status = false;
             }
             return status;
@@ -81,6 +100,15 @@ namespace AutoClicker_Task
             {
                 PrintLog.Print("Edge не найден. Скачайте и установите последнюю версию.", "", "", LevelEvent.Error);
                 Process.Start(new ProcessStartInfo("cmd", $"/c start https://www.microsoft.com/ru-ru/edge"));
+                status = false;
+            }
+            try
+            { //пробный запуск драйвера
+                IWebDriver driver = new EdgeDriver();
+                driver.Dispose();
+            }
+            catch (Exception)
+            {
                 status = false;
             }
             return status;
