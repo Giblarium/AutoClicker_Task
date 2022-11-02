@@ -12,9 +12,14 @@ namespace AutoClicker_Task
 {
     internal static class FileWork
     {
+        static string pathLog = "log.txt";
         static string pathDataFile = "Data.json";
         static string pathBadDataFile = "BadData.json";
-
+        /// <summary>
+        /// Чтение книги с паролями
+        /// </summary>
+        /// <param name="path">Путь к книге Excel</param>
+        /// <returns>Возвращает список аккаунтов</returns>
         public static List<Account> ReadExcelBook(string path)
         {
             Excel.Application ObjWorkExcel = new Excel.Application(); //открыть эксель
@@ -52,6 +57,10 @@ namespace AutoClicker_Task
             }
             return loginList;
         }
+        /// <summary>
+        /// Запись Data.json
+        /// </summary>
+        /// <param name="data">Список аккаунтов</param>
         public static void WriteDataFile(List<Account> data)
         {
             string _accounts = JsonConvert.SerializeObject(data);
@@ -60,19 +69,29 @@ namespace AutoClicker_Task
                 try
                 {
                     File.WriteAllText(pathDataFile, _accounts);
+                    break;
                 }
                 catch (Exception)
                 {
+                    Thread.Sleep(500);
                 }
             }
         }
+        /// <summary>
+        /// Чтение Data.json
+        /// </summary>
+        /// <returns>Возвращает список аккаунтов</returns>
         public static List<Account> ReadDataFile()
         {
             string _accounts = File.ReadAllText(pathDataFile);
             List<Account> accounts = JsonConvert.DeserializeObject<List<Account>>(_accounts);
             return accounts;
         }
-
+        /// <summary>
+        /// Запись аккаунтов, по которым не удалось отправить сообщение
+        /// </summary>
+        /// <param name="account">Аккаунт</param>
+        /// <param name="status">Статус ошибки</param>
         internal static void WriteBadData(Account account, AccountStatus status)
         {
             List<Account> accounts = new List<Account>();
@@ -91,6 +110,35 @@ namespace AutoClicker_Task
                 File.WriteAllText(pathBadDataFile, _baddata);
             }
             
+        }
+        /// <summary>
+        /// Запись лога в файл
+        /// </summary>
+        public static void WriteLog(string message, string login = "", string errorMessage = "", Enums.LevelEvent levelEvent = Enums.LevelEvent.Info, Enums.Browsers browsers = Enums.Browsers.Console, bool printInFile = true)
+        {
+            if (!File.Exists(pathLog))
+            {
+                //в новом файле добавить заголовки
+                File.AppendAllText(pathLog, "Пользователь;Дата;Результат;Логин;Описание;ТекстОшибки\n");
+            }
+            while (true)
+            {
+                //т.к. в файл пишут 3 потока ждем 500 мс после неудачной попытке.
+                try
+                {
+                    File.AppendAllText(pathLog, Environment.UserName.ToString() + ";" + DateTime.Now.ToString() + ";" + levelEvent + ";" + login + ";" + message + ";" + errorMessage + "\n");
+                    break;
+                }
+                catch (Exception)
+                {
+                    Thread.Sleep(500);
+                }
+            }
+        }
+        public static void WriteInfo()
+        {
+            string info = Enums.GetInfoAccountStatus();
+            File.WriteAllText("readme.txt", info);
         }
     }
 }

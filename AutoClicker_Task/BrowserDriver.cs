@@ -57,13 +57,13 @@ namespace AutoClicker_Task
                 }
                 catch (Exception e)
                 {
-                    PrintLog.Print($"Попытка авторизации успешна!", account.Login, "", Enums.LevelEvent.Ok, browsers);
+                    PrintLog.Print($"Попытка авторизации {i + 1} не удалась!", account.Login, "", Enums.LevelEvent.Error, browsers);
                     try
                     {
                         IWebElement authErr = driver.FindElement(By.XPath("//*[contains(text(), 'Ошибка авторизации')]"));
                         if (authErr.Text == "Ошибка авторизации")
                         {
-                            PrintLog.Print($"Авторизация не удалась! Неверный логин/пароль", account.Login, e.Message, Enums.LevelEvent.Ok, browsers);
+                            PrintLog.Print($"Авторизация не удалась! Неверный логин/пароль", account.Login, e.Message, Enums.LevelEvent.Error, browsers);
                             FileWork.WriteBadData(account, Enums.AccountStatus.WrongPass);
                             break;
                         }

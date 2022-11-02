@@ -10,6 +10,7 @@ namespace AutoClicker_Task
 {
     internal class Browsers
     {
+        //пути к веб-драйверам и браузерам
         private static string driverEdge = "msedgedriver.exe";
         private static string driverChrome = "chromedriver.exe";
         private static string driverFirefox = "geckodriver.exe";
@@ -20,6 +21,7 @@ namespace AutoClicker_Task
         private static string browserFirefox = "C:\\Program Files\\Mozilla Firefox\\";
         private static string browserFirefoxx86 = "C:\\Program Files (x86)\\Mozilla Firefox\\";
 
+        //проверка наличия вебдрайверов и браузеров.
         internal static bool[] CheckVersion()
         {
             bool[] version = new bool[4];
@@ -50,7 +52,7 @@ namespace AutoClicker_Task
         private static bool CheckVersionChrome()
         {
             bool status = true;
-            if (!File.Exists(Path.Combine(Environment.CurrentDirectory, driverChrome)))
+            if (!File.Exists(driverChrome))
             {
                 PrintLog.Print("Chromedriver не найден. Скачайте и установите последнюю версию.", "", "", LevelEvent.Error);
                 Process.Start(new ProcessStartInfo("cmd", $"/c start https://chromedriver.chromium.org/downloads"));
