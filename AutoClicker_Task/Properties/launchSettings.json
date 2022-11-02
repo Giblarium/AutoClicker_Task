@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "AutoClicker_Task_Excel": {
+      "commandName": "Project",
+      "commandLineArgs": "\"D:\\Users\\ilsch\\Downloads\\Ильчук (1).xlsx\""
+    },
+    "AutoClicker_Task_DataFile": {
+      "commandName": "Project"
+    }
+  }
+}
