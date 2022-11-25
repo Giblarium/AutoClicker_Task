@@ -12,6 +12,11 @@ namespace API.Controllers
     {
         DBConnector dBConnector = new DBConnector();
 
+
+        /// <summary>
+        /// Получение незанятого аккаунта
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("Get")]
         public string Get()
         {
@@ -40,6 +45,13 @@ namespace API.Controllers
             }
             return answer;
         }
+
+        /// <summary>
+        /// Установка статуса аккаунту
+        /// </summary>
+        /// <param name="login">Логин</param>
+        /// <param name="status">Статус</param>
+        /// <returns></returns>
         [HttpPost("Update/{login}/{status}")]
         public IActionResult Update([FromRoute]string login, [FromRoute]string status)
         {

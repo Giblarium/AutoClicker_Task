@@ -117,7 +117,7 @@ async void RunFirefox()
         driverFirefox.Dispose();
     }
 }
-static Account GetAccount(List<Account> accounts)
+static Account GetAccount(List<Account> accounts) // не используется.
 {
     accounts[0].Status = AccountStatus.InWork;
     Account account = accounts[0];
