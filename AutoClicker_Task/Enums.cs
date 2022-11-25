@@ -18,6 +18,8 @@ namespace AutoClicker_Task
             stringBuilder.AppendLine("4 - Долгая загрузка сообщения");
             stringBuilder.AppendLine("5 - В текущем месяце уже есть сообщения");
             stringBuilder.AppendLine("6 - Другое");
+            stringBuilder.AppendLine("7 - Только авторизация");
+            stringBuilder.AppendLine("8 - Отключена отправка сообщений");
             return stringBuilder.ToString();
         }
 
@@ -32,7 +34,9 @@ namespace AutoClicker_Task
             WrongPass,
             LongLoadApp,
             AlreadyMessage,
-            Other
+            Other,
+            AuthOnly,
+            DontSend
         }
         /// <summary>
         /// список браузеров

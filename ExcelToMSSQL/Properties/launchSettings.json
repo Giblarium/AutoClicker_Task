@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ExcelToMSSQL": {
+      "commandName": "Project",
+      "commandLineArgs": "d:\\Users\\ilsch\\Desktop\\Общий_список_КОННЕКТЫ_на_ИЮЛЬ.xlsx"
+    }
+  }
+}

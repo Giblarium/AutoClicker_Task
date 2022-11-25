@@ -9,7 +9,7 @@ namespace AutoClicker_Task
             throw new NotImplementedException();
         }
 
-        internal static void Run(IWebDriver driver, Account account, Settings settings, Enums.Browsers browsers)
+        internal static Enums.AccountStatus Run(IWebDriver driver, Account account, Settings settings, Enums.Browsers browsers)
         {
             //создание нового окна
             driver.Url = "http://web.1c-connect.com";
@@ -60,13 +60,13 @@ namespace AutoClicker_Task
                         {
                             PrintLog.Print($"Авторизация не удалась! Неверный логин/пароль", account.Login, e.Message, Enums.LevelEvent.Error, browsers);
                             FileWork.WriteBadData(account, Enums.AccountStatus.WrongPass);
-                            break;
+                            return Enums.AccountStatus.WrongPass;
                         }
                         if (authErr.Text == "Сбой авторизации")
                         {
                             PrintLog.Print($"Авторизация не удалась! Что-то пошло не так", account.Login, e.Message, Enums.LevelEvent.Error, browsers);
                             FileWork.WriteBadData(account, Enums.AccountStatus.Other);
-                            break;
+                            return Enums.AccountStatus.Other;
                         }
                     }
                     catch (Exception)
@@ -79,14 +79,14 @@ namespace AutoClicker_Task
             //если меню не удалось открыть, то сл
             if (!openMenu)
             {
-                return;
+                return Enums.AccountStatus.Other;
             }
 
             //если нужны только авторизации
             if (settings.authOnly)
             {
                 PrintLog.Print($"Включен режим \"Только авторизация\"", account.Login, "", Enums.LevelEvent.Warning, browsers);
-                return;
+                return Enums.AccountStatus.AuthOnly;
             }
 
             //открытие списка линий поддержки
@@ -115,7 +115,7 @@ namespace AutoClicker_Task
                 {
                     PrintLog.Print($"Не удалось найти линии поддержки!", account.Login, ex.Message, Enums.LevelEvent.Ok, browsers);
                     FileWork.WriteBadData(account, Enums.AccountStatus.Other);
-                    return;
+                    return Enums.AccountStatus.Other;
                 }
             }
 
@@ -126,7 +126,7 @@ namespace AutoClicker_Task
                 IWebElement previousMessage = driver.FindElement(By.XPath($"//*[contains(text(), '{settings.currentMonth}')]"));
                 PrintLog.Print($"В {settings.currentMonth} уже есть обращения!", account.Login, "", Enums.LevelEvent.Warning, browsers);
                 FileWork.WriteBadData(account, Enums.AccountStatus.AlreadyMessage);
-                return;
+                return Enums.AccountStatus.AlreadyMessage;
             }
             catch (Exception)
             {
@@ -148,9 +148,10 @@ namespace AutoClicker_Task
             else
             {
                 PrintLog.Print($"Отправка сообщений отключена!", account.Login, "", Enums.LevelEvent.Warning, browsers);
+                return Enums.AccountStatus.DontSend;
             }
             Thread.Sleep(settings.waitTreatmentPause);
-
+            return Enums.AccountStatus.Ok;
         }
     }
 }

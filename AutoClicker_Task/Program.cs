@@ -1,16 +1,20 @@
 ﻿using AutoClicker_Task;
+using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
+using System.Net.Http;
 using System.Reflection;
 using static AutoClicker_Task.Enums;
+
+
 
 PrintLog.Print($"Версия программы: {Assembly.GetExecutingAssembly().GetName().Version}");
 Settings settings = Settings.GetSettings();
 PrintLog.Print($"Поиск сообщений на линии поддержки от {settings.currentMonth}");
 bool[] browsers = AutoClicker_Task.Browsers.CheckVersion();
-FileWork.WriteInfo();
+FileWork.WriteInfo(); /*
 List<Account> accounts;
 if (args.Length > 0)
 {
@@ -32,7 +36,7 @@ else
     }
     accounts = FileWork.ReadDataFile();
 }
-
+*/
 Thread EdgeWorker = new Thread(RunEdge);
 Thread ChromeWorker = new Thread(RunChrome);
 Thread FirefoxWorker = new Thread(RunFirefox);
@@ -41,14 +45,14 @@ if (browsers[1])
 {
     EdgeWorker.Start();
 }
-if (browsers[2])
-{
-    ChromeWorker.Start();
-}
-if (browsers[3])
-{
-    FirefoxWorker.Start();
-}
+//if (browsers[2])
+//{
+//    ChromeWorker.Start();
+//}
+//if (browsers[3])
+//{
+//    FirefoxWorker.Start();
+//}
 
 
 do
@@ -58,34 +62,54 @@ do
 
 BeforeColse();
 
-void RunChrome()
+async void RunChrome()
 {
-    while (accounts.Count > 0)
+    while (true)
     {
-        PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
-        Account account = GetAccount(accounts);
+        //PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
+        Account account = await GetNewAccountAsync();
+        if (account == null)
+        {
+            PrintLog.Print($"Не получен аккаунт", "", "", LevelEvent.Error);
+            break;
+        }
         IWebDriver driverChrome = new ChromeDriver();
-        BrowserDriver.Run(driverChrome, account, settings, Enums.Browsers.Chrome);
+        Enums.AccountStatus accountStatus = BrowserDriver.Run(driverChrome, account, settings, Enums.Browsers.Chrome);
+        UpdateAccountAsync(account.Login, (int)accountStatus);
         driverChrome.Dispose();
     }
 }
-void RunEdge()
+
+
+
+async void RunEdge()
 {
-    while (accounts.Count > 0)
+    while (true)
     {
-        PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
-        Account account = GetAccount(accounts);
+        //PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
+        Account account = await GetNewAccountAsync();
+        if (account == null)
+        {
+            PrintLog.Print($"Не получен аккаунт", "", "", LevelEvent.Error);
+            break;
+        }
         IWebDriver driverEdge = new EdgeDriver();
-        BrowserDriver.Run(driverEdge, account, settings, Enums.Browsers.Edge);
+        Enums.AccountStatus accountStatus = BrowserDriver.Run(driverEdge, account, settings, Enums.Browsers.Edge);
+        UpdateAccountAsync(account.Login, (int)accountStatus);
         driverEdge.Dispose();
     }
 }
-void RunFirefox()
+async void RunFirefox()
 {
-    while (accounts.Count > 0)
+    while (true)
     {
-        PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
-        Account account = GetAccount(accounts);
+        //PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
+        Account account = await GetNewAccountAsync();
+        if (account == null)
+        {
+            PrintLog.Print($"Не получен аккаунт", "", "", LevelEvent.Error);
+            break;
+        }
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         firefoxOptions.BrowserExecutableLocation = ("C:\\Program Files\\Mozilla Firefox\\firefox.exe");
         IWebDriver driverFirefox = new FirefoxDriver(firefoxOptions);
@@ -101,6 +125,37 @@ static Account GetAccount(List<Account> accounts)
     FileWork.WriteDataFile(accounts);
     return account;
 }
+static async Task<Account> GetNewAccountAsync()
+{
+    HttpClient httpClient = new()
+    {
+        BaseAddress = new Uri("http://1c.giblarium.ru/")
+    };
+    StringContent jsonContentGet = new StringContent("");
+    HttpResponseMessage responseGet = await httpClient.GetAsync("Account/Get");
+    responseGet.EnsureSuccessStatusCode();
+    var jsonResponse = await responseGet.Content.ReadAsStringAsync();
+    if (jsonResponse == "")
+    {
+        return null;
+    }
+    Account account = JsonConvert.DeserializeObject<Account>(jsonResponse);
+    return account;
+}
+
+async void UpdateAccountAsync(string login, int accountStatus)
+{
+    HttpClient httpClient = new()
+    {
+        BaseAddress = new Uri("http://1c.giblarium.ru/")
+    };
+    using StringContent jsonContentPost = new("");
+
+    using HttpResponseMessage responsePost = await httpClient.PostAsync(
+        string.Format($"/Account/Update/{login}/{accountStatus}/"),
+        jsonContentPost);
+}
+
 void BeforeColse()
 {
     PrintLog.Print("Программа завершена.", "", "", LevelEvent.Ok);

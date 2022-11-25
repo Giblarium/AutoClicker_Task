@@ -18,7 +18,7 @@ namespace API.Controllers
             string sql = string.Format(
                 "SELECT TOP(1)  Login, Password, Status " +
                 "FROM           Accounts " +
-                "WHERE          (Status = 0) "
+                "WHERE          (Status = 0)"
                 );
             string answer = "";
             dBConnector.OpenConnection();
