@@ -4,6 +4,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using static AutoClicker_Task.Enums;
@@ -13,30 +14,45 @@ using static AutoClicker_Task.Enums;
 PrintLog.Print($"Версия программы: {Assembly.GetExecutingAssembly().GetName().Version}");
 Settings settings = Settings.GetSettings();
 PrintLog.Print($"Поиск сообщений на линии поддержки от {settings.currentMonth}");
+List<Account> accounts = new List<Account>();   
 bool[] browsers = AutoClicker_Task.Browsers.CheckVersion();
-FileWork.WriteInfo(); /*
-List<Account> accounts;
-if (args.Length > 0)
+FileWork.WriteInfo();
+
+if (settings.useAPI)
 {
-    if (File.Exists("Data.json"))
-    {
-        PrintLog.Print($"Найден файл данных Data.json. Удалите его или запустите программу без книги Excel.", "", "", LevelEvent.Error);
-        BeforeColse();
-        return;
-    }
-    accounts = FileWork.ReadExcelBook(args[0]);
+    PrintLog.Print($"Используется API!");
+    ServiceAvalibleAsync();
 }
 else
 {
-    if (!File.Exists("Data.json"))
+    PrintLog.Print($"Используется файлы данных!");
+    if (args.Length > 0)
     {
-        PrintLog.Print($"Файл данных Data.json не найден. Запустите программу перетаскиванием книги Excel.", "", "", LevelEvent.Error);
-        BeforeColse();
-        return;
+        if (File.Exists("Data.json"))
+        {
+            PrintLog.Print($"Найден файл данных Data.json. Удалите его или запустите программу без книги Excel.", "", "", LevelEvent.Error);
+            BeforeColse();
+            return;
+        }
+        accounts = FileWork.ReadExcelBook(args[0]);
     }
-    accounts = FileWork.ReadDataFile();
+    else
+    {
+        if (!File.Exists("Data.json"))
+        {
+            PrintLog.Print($"Файл данных Data.json не найден. Запустите программу перетаскиванием книги Excel.", "", "", LevelEvent.Error);
+            BeforeColse();
+            return;
+        }
+        accounts = FileWork.ReadDataFile();
+    }
 }
-*/
+
+
+
+
+
+
 Thread EdgeWorker = new Thread(RunEdge);
 Thread ChromeWorker = new Thread(RunChrome);
 Thread FirefoxWorker = new Thread(RunFirefox);
@@ -45,14 +61,14 @@ if (browsers[1])
 {
     EdgeWorker.Start();
 }
-//if (browsers[2])
-//{
-//    ChromeWorker.Start();
-//}
-//if (browsers[3])
-//{
-//    FirefoxWorker.Start();
-//}
+if (browsers[2])
+{
+    ChromeWorker.Start();
+}
+if (browsers[3])
+{
+    FirefoxWorker.Start();
+}
 
 
 do
@@ -62,17 +78,48 @@ do
 
 BeforeColse();
 
+
+
+
+#region Методы
+async void ServiceAvalibleAsync()
+{
+    HttpClient httpClient = new()
+    {
+        BaseAddress = new Uri("http://1c.giblarium.ru/")
+    };
+    StringContent jsonContentGet = new StringContent("");
+    HttpResponseMessage responseGet = await httpClient.GetAsync("Account/Avalible");
+    if (responseGet.StatusCode != HttpStatusCode.OK)
+    {
+        PrintLog.Print($"Сервис недоступен!", "", responseGet.StatusCode.ToString(), LevelEvent.Error);
+        BeforeColse();
+    }
+}
 async void RunChrome()
 {
     while (true)
     {
-        //PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
-        Account account = await GetNewAccountAsync();
-        if (account == null)
+        Account account = new Account();
+        if (settings.useAPI)
         {
-            PrintLog.Print($"Не получен аккаунт", "", "", LevelEvent.Error);
-            break;
+            account = await GetNewAccountAsync();
+            if (account == null)
+            {
+                PrintLog.Print($"Не получен аккаунт", "", "", LevelEvent.Error);
+                break;
+            }
         }
+        else
+        {
+            if (accounts.Count == 0)
+            {
+                break;
+            }
+            PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
+            account = GetAccount(accounts);
+        }
+
         IWebDriver driverChrome = new ChromeDriver();
         Enums.AccountStatus accountStatus = BrowserDriver.Run(driverChrome, account, settings, Enums.Browsers.Chrome);
         UpdateAccountAsync(account.Login, (int)accountStatus);
@@ -86,12 +133,24 @@ async void RunEdge()
 {
     while (true)
     {
-        //PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
-        Account account = await GetNewAccountAsync();
-        if (account == null)
+        Account account = new Account();
+        if (settings.useAPI)
         {
-            PrintLog.Print($"Не получен аккаунт", "", "", LevelEvent.Error);
-            break;
+            account = await GetNewAccountAsync();
+            if (account == null)
+            {
+                PrintLog.Print($"Не получен аккаунт", "", "", LevelEvent.Error);
+                break;
+            }
+        }
+        else
+        {
+            if (accounts.Count == 0)
+            {
+                break;
+            }
+            PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
+            account = GetAccount(accounts);
         }
         IWebDriver driverEdge = new EdgeDriver();
         Enums.AccountStatus accountStatus = BrowserDriver.Run(driverEdge, account, settings, Enums.Browsers.Edge);
@@ -103,12 +162,24 @@ async void RunFirefox()
 {
     while (true)
     {
-        //PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
-        Account account = await GetNewAccountAsync();
-        if (account == null)
+        Account account = new Account();
+        if (settings.useAPI)
         {
-            PrintLog.Print($"Не получен аккаунт", "", "", LevelEvent.Error);
-            break;
+            account = await GetNewAccountAsync();
+            if (account == null)
+            {
+                PrintLog.Print($"Не получен аккаунт", "", "", LevelEvent.Error);
+                break;
+            }
+        }
+        else
+        {
+            if (accounts.Count == 0)
+            {
+                break;
+            }
+            PrintLog.Print($"Осталось аккаунтов: {accounts.Count} ", "", "", LevelEvent.Info);
+            account = GetAccount(accounts);
         }
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         firefoxOptions.BrowserExecutableLocation = ("C:\\Program Files\\Mozilla Firefox\\firefox.exe");
@@ -160,4 +231,6 @@ void BeforeColse()
 {
     PrintLog.Print("Программа завершена.", "", "", LevelEvent.Ok);
     Console.ReadLine();
+    Environment.Exit(0);
 }
+#endregion

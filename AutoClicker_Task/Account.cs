@@ -11,5 +11,9 @@
             Password = password;
             Status = status;
         }
+
+        public Account()
+        {
+        }
     }
 }

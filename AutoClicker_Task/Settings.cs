@@ -19,6 +19,7 @@ namespace AutoClicker_Task
         public string currentMonth; //строка с текущим месяцев
         public bool deleteData = false; //Не помню.
         public int countTry = 3; //количество попыток, перед
+        public bool useAPI = true; //обращение к API
 
         public Settings(string currentMonth)
         {

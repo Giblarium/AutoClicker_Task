@@ -64,5 +64,10 @@ namespace API.Controllers
             dBConnector.CloseConnection();
             return Ok();
         }
+        [HttpGet("Avalible")]
+        public IActionResult Avalible()
+        {
+            return Ok();
+        }
     }
 }
