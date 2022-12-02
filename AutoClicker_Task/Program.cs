@@ -184,7 +184,8 @@ async void RunFirefox()
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         firefoxOptions.BrowserExecutableLocation = ("C:\\Program Files\\Mozilla Firefox\\firefox.exe");
         IWebDriver driverFirefox = new FirefoxDriver(firefoxOptions);
-        BrowserDriver.Run(driverFirefox, account, settings, Enums.Browsers.Firefox);
+        Enums.AccountStatus accountStatus = BrowserDriver.Run(driverFirefox, account, settings, Enums.Browsers.Firefox);
+        UpdateAccountAsync(account.Login, (int)accountStatus);
         driverFirefox.Dispose();
     }
 }

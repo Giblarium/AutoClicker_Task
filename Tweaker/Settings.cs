@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace AutoClicker_Task
+namespace Tweaker
 {
     public class Settings
     {
@@ -38,7 +38,7 @@ namespace AutoClicker_Task
             {
                 string _settings = File.ReadAllText(settingsPath);
                 settings = JsonConvert.DeserializeObject<Settings>(_settings);
-                PrintLog.Print("Настройки загружены!");
+                //PrintLog.Print("Настройки загружены!");
             }
             //иначе создаем новый и записываем
             else
@@ -46,7 +46,7 @@ namespace AutoClicker_Task
                 settings = new Settings(GetCurrentMonth());
                 string _settings = JsonConvert.SerializeObject(settings);
                 File.WriteAllText(settingsPath, _settings);
-                PrintLog.Print("Настройки сохранены!");
+                //PrintLog.Print("Настройки сохранены!");
             }
             return settings;
         }
