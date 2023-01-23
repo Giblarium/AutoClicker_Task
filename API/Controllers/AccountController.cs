@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using API;
 using Newtonsoft.Json;
+using System.Text;
+using System.ServiceProcess;
 
 namespace API.Controllers
 {
@@ -69,5 +71,66 @@ namespace API.Controllers
         {
             return Ok();
         }
+        [HttpPost("Add/{login}/{password}")]
+        public string Add([FromRoute] string login, [FromRoute] string password)
+        {
+            string sql = string.Format("SELECT * FROM Accounts WHERE Login = '{0}'", login);
+            dBConnector.OpenConnection();
+            using (SqlCommand cmd = new SqlCommand(sql, dBConnector.connect))
+            {
+                cmd.CommandText = sql;
+                SqlDataReader sqlDataReader = cmd.ExecuteReader();
+                if (sqlDataReader.HasRows)
+                {
+                    dBConnector.CloseConnection();
+                    sql = string.Format("UPDATE Accounts SET Password = '{1}' WHERE Login = '{0}'", login, password);
+                    dBConnector.OpenConnection();
+                    cmd.CommandText = sql;
+                    cmd.ExecuteNonQuery();
+                    dBConnector.CloseConnection();
+                    return "Update!";
+                }
+                else
+                {
+                    dBConnector.CloseConnection();
+                }
+                sql = string.Format("INSERT INTO Accounts (Login, Password, Status) VALUES ('{1}','{0}',0)", password, login);
+                dBConnector.OpenConnection();
+                cmd.CommandText = sql;
+                cmd.ExecuteNonQuery();
+                dBConnector.CloseConnection();
+                return "Add!";
+            }
+
+        }
+        [HttpGet("GetAll")]
+        public string GetAll()
+        {
+            string sql = string.Format("SELECT * FROM Accounts");
+            StringBuilder stringBuilder = new StringBuilder();
+            dBConnector.OpenConnection();
+            using (SqlCommand cmd = new SqlCommand(sql, dBConnector.connect))
+            {
+                cmd.CommandText = sql;
+                SqlDataReader sqlDataReader = cmd.ExecuteReader();
+                while (sqlDataReader.HasRows)
+                {
+                    if (sqlDataReader.Read())
+                    {
+                        stringBuilder.Append(sqlDataReader.GetValue(0).ToString().Trim() + ";");
+                        stringBuilder.Append(sqlDataReader.GetValue(1).ToString().Trim() + ";");
+                        stringBuilder.Append(sqlDataReader.GetValue(2).ToString().Trim() + "\n");
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                dBConnector.CloseConnection();
+            }
+            return stringBuilder.ToString();
+
+        }
+        
     }
 }

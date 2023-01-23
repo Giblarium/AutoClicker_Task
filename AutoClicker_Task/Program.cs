@@ -49,10 +49,6 @@ else
 }
 
 
-
-
-
-
 Thread EdgeWorker = new Thread(RunEdge);
 Thread ChromeWorker = new Thread(RunChrome);
 Thread FirefoxWorker = new Thread(RunFirefox);
@@ -122,7 +118,10 @@ async void RunChrome()
 
         IWebDriver driverChrome = new ChromeDriver();
         Enums.AccountStatus accountStatus = BrowserDriver.Run(driverChrome, account, settings, Enums.Browsers.Chrome);
-        UpdateAccountAsync(account.Login, (int)accountStatus);
+        if (settings.useAPI)
+        {
+            UpdateAccountAsync(account.Login, (int)accountStatus);
+        }
         driverChrome.Dispose();
     }
 }
@@ -154,7 +153,10 @@ async void RunEdge()
         }
         IWebDriver driverEdge = new EdgeDriver();
         Enums.AccountStatus accountStatus = BrowserDriver.Run(driverEdge, account, settings, Enums.Browsers.Edge);
-        UpdateAccountAsync(account.Login, (int)accountStatus);
+        if (settings.useAPI)
+        {
+            UpdateAccountAsync(account.Login, (int)accountStatus);
+        }
         driverEdge.Dispose();
     }
 }
@@ -185,7 +187,10 @@ async void RunFirefox()
         firefoxOptions.BrowserExecutableLocation = ("C:\\Program Files\\Mozilla Firefox\\firefox.exe");
         IWebDriver driverFirefox = new FirefoxDriver(firefoxOptions);
         Enums.AccountStatus accountStatus = BrowserDriver.Run(driverFirefox, account, settings, Enums.Browsers.Firefox);
-        UpdateAccountAsync(account.Login, (int)accountStatus);
+        if (settings.useAPI)
+        {
+            UpdateAccountAsync(account.Login, (int)accountStatus);
+        }
         driverFirefox.Dispose();
     }
 }
